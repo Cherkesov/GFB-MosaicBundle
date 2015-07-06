@@ -149,6 +149,14 @@ class Color
      */
     public function __toString()
     {
+        return "{$this->red}, {$this->green}, {$this->blue}, {$this->alpha}";
+    }
+
+    /**
+     * @return string
+     */
+    public function __toHEX()
+    {
         return sprintf(
             "%02X%02X%02X",
             $this->red, $this->green, $this->blue
@@ -166,6 +174,6 @@ class Color
         $weight += abs($color1->getRed() - $color2->getRed());
         $weight += abs($color1->getGreen() - $color2->getGreen());
         $weight += abs($color1->getBlue() - $color2->getBlue());
-        return $weight;
+        return $weight / 3; // TODO: divide on 3
     }
 }
