@@ -34,8 +34,6 @@ class MosaicProcessor
 
     /**
      * @param ImagickExt $imagick
-     * @param int $partSize
-     * @param int $levels
      * @param bool $debug
      */
     public function __construct($imagick, $debug = false)
@@ -188,6 +186,7 @@ class MosaicProcessor
                 continue;
             }
             echo "Found image for {$segment}\n";
+            $segment->setPart($part);
 
             $tile = new ImagickExt($this->docRoot . $part->getPath());
             $tile->resizeImage(
