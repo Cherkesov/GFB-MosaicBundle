@@ -132,12 +132,11 @@ class CreateMosaicCommand extends ContainerAwareCommand
             $processor->paving($accuracy, $partOpacity);
 
             $markupGen = new MarkupGenerator();
-            $output = $markupGen->generate(
+            $markupGen->generate(
                 $imagick,
                 $this->mosaicsPath . "R" . $name,
                 $processor->getSegments()
             );
-            file_put_contents($mosaicFullPath . "R" . $name . ".html", $output);
         } catch (\Exception $ex) {
             echo $ex->getMessage() . "\n";
         }
