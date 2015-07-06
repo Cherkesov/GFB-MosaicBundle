@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class Color
  * @package GFB\MosaicBundle\Entity
  * @ORM\Entity
- * @ORM\Table(name="adw_mosaic_color")
+ * @ORM\Table(name="gfb_mosaic_color")
  */
 class Color
 {

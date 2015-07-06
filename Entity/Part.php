@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
  * Class Part
  * @package GFB\MosaicBundle\Entity
  * @ORM\Entity(repositoryClass="GFB\MosaicBundle\Repo\PartRepo")
- * @ORM\Table(name="adw_mosaic_part")
+ * @ORM\Table(name="gfb_mosaic_part")
  */
 class Part
 {
@@ -55,6 +55,12 @@ class Part
      * @ORM\Column(type="integer")
      */
     private $height;
+
+    /**
+     * @var string
+     * @ORM\Column(type="string", length=256, nullable=true)
+     */
+    private $color;
 
     /**
      * @return int
@@ -151,6 +157,24 @@ class Part
     public function setHeight($height)
     {
         $this->height = intval($height);
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getColor()
+    {
+        return $this->color;
+    }
+
+    /**
+     * @param string $color
+     * @return $this
+     */
+    public function setColor($color)
+    {
+        $this->color = $color;
         return $this;
     }
 
