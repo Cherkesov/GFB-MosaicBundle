@@ -26,6 +26,11 @@ class Segment
     private $avgColor;
 
     /**
+     * @var Part
+     */
+    private $part;
+
+    /**
      * @param int $startX
      * @param int $startY
      * @param int $endX
@@ -143,5 +148,21 @@ class Segment
     public function getHeight()
     {
         return abs($this->endY - $this->startY);
+    }
+
+    /**
+     * @return Part
+     */
+    public function getPart()
+    {
+        return $this->part;
+    }
+
+    /**
+     * @param Part $part
+     */
+    public function setPart($part)
+    {
+        $this->part = $part;
     }
 }
