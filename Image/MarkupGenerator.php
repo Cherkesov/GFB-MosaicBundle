@@ -14,24 +14,43 @@ class MarkupGenerator
 {
     /**
      * @param ImagickExt $imagick
+     * @param string $docRoot
      * @param string $filePath
      * @param Segment[] $segments
      */
-    public function generate($imagick, $filePath, $segments)
+    public function generate($imagick, $docRoot, $filePath, $segments)
     {
         $markup = "
 <style>
     .mosaic_canvas {
+        width: 1280px;
+        margin: 0 auto;
         background-image: url({$filePath});
         background-size: 100% auto;
         position: relative;
     }
 
+    .mosaic_canvas img {
+        width: 100%;
+    }
+
+    .mosaic_part:hover {
+        background: rgba(95, 158, 160, 0.5);
+    }
+
     .mosaic_popup {
+        margin-left: -210px;
+        width: 420px;
         background: #808080;
         padding: 24px;
         display: none;
-        max-width: 800px;
+        position: absolute;
+        left: 50%;
+        top: 25%;
+    }
+
+    .mosaic_popup img {
+        width: 100%;
     }
 </style>
         ";
@@ -41,6 +60,8 @@ class MarkupGenerator
 
         $cW = $imagick->getWidth();
         $cH = $imagick->getHeight();
+
+        echo "\nCanvas size : {$cW}x{$cH}\n";
 
         foreach ($segments as $segment) {
             $markup .= $this->itemCode($cW, $cH, $segment);
@@ -57,10 +78,13 @@ class MarkupGenerator
         $(function() {
             var $popup = $(".mosaic_popup");
 
-            $(".mosaic_canvas .mosaic_part").hover(function() {
+            $(".mosaic_canvas .mosaic_part").click(function(event) {
+                event.stopPropagation();
                 $popup.find("img").attr("src", $(this).data("orig"));
                 $popup.show();
-            }, function() {
+            });
+
+            $("body").click(function() {
                 $popup.hide();
             });
         });
@@ -68,7 +92,7 @@ class MarkupGenerator
 </script>
 ';
 
-        file_put_contents($filePath . ".html", $markup);
+        file_put_contents($docRoot. $filePath . ".html", $markup);
     }
 
     /**
@@ -79,15 +103,19 @@ class MarkupGenerator
      */
     private function itemCode($canvasWidth, $canvasHeight, $segment)
     {
-        $width = intval($segment->getWidth() / ($canvasWidth / 100));
-        $height = intval($segment->getHeight() / ($canvasHeight / 100));
+        $width = floatval($segment->getWidth() / ($canvasWidth / 100));
+        $height = floatval($segment->getHeight() / ($canvasHeight / 100));
 
-        $left = intval($segment->getStartX() / ($canvasWidth / 100));
-        $top = intval($segment->getStartY() / ($canvasHeight / 100));
+        $left = floatval($segment->getStartX() / ($canvasWidth / 100));
+        $top = floatval($segment->getStartY() / ($canvasHeight / 100));
+
+        echo "Part size : {$width}x{$height} {$left} {$top}\n";
+
+        $path = ($segment->getPart()) ? $segment->getPart()->getPath() : "";
 
         return "
     <div class=\"mosaic_part\" style=\"position: absolute;
-        width: {$width}px; height: {$height}px;
-        top: {$top}px; left: {$left}px;' data-orig='{$segment->getPart()->getPath()}\"></div>";
+        width: {$width}%; height: {$height}%;
+        top: {$top}%; left: {$left}%;\" data-orig=\"{$path}\"></div>";
     }
 }

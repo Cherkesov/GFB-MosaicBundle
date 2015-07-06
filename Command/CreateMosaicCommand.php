@@ -17,6 +17,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * Class CreateMosaicCommand
+ * @package GFB\MosaicBundle\Command
+ */
 class CreateMosaicCommand extends ContainerAwareCommand
 {
     private $docRoot;
@@ -85,6 +89,8 @@ class CreateMosaicCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        // php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
+
         $this->output = $output;
 
         if (!extension_loaded('imagick')) {
@@ -130,10 +136,12 @@ class CreateMosaicCommand extends ContainerAwareCommand
 
             $processor->segmentation($partSize, $segmentationLevel);
             $processor->paving($accuracy, $partOpacity);
+            $imagick->writeImage($mosaicFullPath . "R" . $name);
 
             $markupGen = new MarkupGenerator();
             $markupGen->generate(
                 $imagick,
+                $this->docRoot,
                 $this->mosaicsPath . "R" . $name,
                 $processor->getSegments()
             );
@@ -142,8 +150,6 @@ class CreateMosaicCommand extends ContainerAwareCommand
         }
 
         // TODO: Finish some magic!
-
-        $imagick->writeImage($mosaicFullPath . "R" . $name);
 
         return 0;
     }
