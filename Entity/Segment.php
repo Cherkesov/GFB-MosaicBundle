@@ -128,4 +128,20 @@ class Segment
     {
         return "POS: {$this->startX}, {$this->startY}, {$this->endX}, {$this->endY} RGBA ({$this->avgColor})";
     }
+
+    /**
+     * @return number
+     */
+    public function getWidth()
+    {
+        return abs($this->endX - $this->startX);
+    }
+
+    /**
+     * @return number
+     */
+    public function getHeight()
+    {
+        return abs($this->endY - $this->startY);
+    }
 }

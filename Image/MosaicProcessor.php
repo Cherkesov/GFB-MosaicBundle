@@ -12,7 +12,7 @@ use GFB\MosaicBundle\Entity\Color;
 use GFB\MosaicBundle\Entity\Segment;
 use GFB\MosaicBundle\Repo\PartRepo;
 
-class ImageProcessor
+class MosaicProcessor
 {
     /** @var ImagickExt */
     private $imagick;
@@ -26,8 +26,8 @@ class ImageProcessor
     /** @var boolean */
     private $debug;
 
-    /** @var array */
-    private $segmentationMap = array();
+    /** @var Segment[] */
+    private $segments = array();
 
     /** @var PartRepo */
     private $partRepo;
@@ -101,7 +101,7 @@ class ImageProcessor
             $this->makeSegment($sx, $sy + $height / 2, $ex - $width / 2, $ey, $level); // bottom left
             $this->makeSegment($sx + $width / 2, $sy + $height / 2, $ex, $ey, $level); // bottom right
         } else {
-            $this->segmentationMap[] = new Segment($sx, $sy, $ex, $ey, $part->getAvgColor());
+            $this->segments[] = new Segment($sx, $sy, $ex, $ey, $part->getAvgColor());
             if ($this->debug) {
                 $this->drawCrossMark($sx, $sy, $ex, $ey);
             }
@@ -168,7 +168,7 @@ class ImageProcessor
      */
     public function paving($accuracy = 32, $partOpacity = 1)
     {
-        if (count($this->segmentationMap) == 0) {
+        if (count($this->segments) == 0) {
             echo "Segmentation map is empty!\n";
             return false;
         }
@@ -178,10 +178,10 @@ class ImageProcessor
             return false;
         }
 
-        echo "Paving for " . count($this->segmentationMap) . " segments...\n";
+        echo "Paving for " . count($this->segments) . " segments...\n";
 
         /** @var Segment $segment */
-        foreach ($this->segmentationMap as $segment) {
+        foreach ($this->segments as $segment) {
             $part = $this->partRepo->findOneWithColorLike($segment->getAvgColor(), $accuracy);
 
             if (!$part) {
@@ -219,5 +219,21 @@ class ImageProcessor
     public function setPartRepo($partRepo)
     {
         $this->partRepo = $partRepo;
+    }
+
+    /**
+     * @return \GFB\MosaicBundle\Entity\Segment[]
+     */
+    public function getSegments()
+    {
+        return $this->segments;
+    }
+
+    /**
+     * @param \GFB\MosaicBundle\Entity\Segment[] $segments
+     */
+    public function setSegments($segments)
+    {
+        $this->segments = $segments;
     }
 }

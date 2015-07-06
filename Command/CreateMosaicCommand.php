@@ -8,7 +8,8 @@
 
 namespace GFB\MosaicBundle\Command;
 
-use GFB\MosaicBundle\Image\ImageProcessor;
+use GFB\MosaicBundle\Image\MarkupGenerator;
+use GFB\MosaicBundle\Image\MosaicProcessor;
 use GFB\MosaicBundle\Image\ImagickExt;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
@@ -31,7 +32,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
 
         $this->docRoot = __DIR__ . "/../../../../web";
         $this->imagesPath = $this->docRoot . "/mosaic/images/";
-        $this->mosaicsPath = $this->docRoot . "/mosaic/res/";
+        $this->mosaicsPath = "/mosaic/res/";
     }
 
     protected function configure()
@@ -92,11 +93,13 @@ class CreateMosaicCommand extends ContainerAwareCommand
             return -1;
         }
 
-        if (!file_exists($this->mosaicsPath)) {
-            mkdir($this->mosaicsPath, 0777);
+        $mosaicFullPath = $this->docRoot . $this->mosaicsPath;
+
+        if (!file_exists($mosaicFullPath)) {
+            mkdir($mosaicFullPath, 0777);
         }
-        if (!is_writable($this->mosaicsPath)) {
-            chmod($this->mosaicsPath, 0777);
+        if (!is_writable($mosaicFullPath)) {
+            chmod($mosaicFullPath, 0777);
         }
 
         $imagick = new ImagickExt();
@@ -112,14 +115,14 @@ class CreateMosaicCommand extends ContainerAwareCommand
         $partSize = $input->getOption('size');
         $segmentationLevel = $input->getOption("level");
         $accuracy = $input->getOption('accuracy');
-        $partOpacity = $input->getOption("opacity");;
+        $partOpacity = $input->getOption("opacity");
 
         $imagick->readImage($this->imagesPath . $name);
 
         // TODO: Do some magic!
 
         try {
-            $processor = new ImageProcessor($imagick);
+            $processor = new MosaicProcessor($imagick);
             $processor->setPartRepo(
                 $this->getContainer()->get("doctrine")->getEntityManager()
                     ->getRepository("GFBMosaicBundle:Part")
@@ -127,13 +130,21 @@ class CreateMosaicCommand extends ContainerAwareCommand
 
             $processor->segmentation($partSize, $segmentationLevel);
             $processor->paving($accuracy, $partOpacity);
+
+            $markupGen = new MarkupGenerator();
+            $output = $markupGen->generate(
+                $imagick,
+                $this->mosaicsPath . "R" . $name,
+                $processor->getSegments()
+            );
+            file_put_contents($mosaicFullPath . "R" . $name . ".html", $output);
         } catch (\Exception $ex) {
             echo $ex->getMessage() . "\n";
         }
 
         // TODO: Finish some magic!
 
-        $imagick->writeImage($this->mosaicsPath . "R" . $name);
+        $imagick->writeImage($mosaicFullPath . "R" . $name);
 
         return 0;
     }
