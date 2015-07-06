@@ -55,13 +55,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
                 InputOption::VALUE_REQUIRED,
                 "Which images do you want to find?",
                 null
-            )/*->addOption(
-                'color',
-                null,
-                InputOption::VALUE_REQUIRED,
-                "Which images do you want to find?",
-                null
-            )*/
+            )
         ;
     }
 
