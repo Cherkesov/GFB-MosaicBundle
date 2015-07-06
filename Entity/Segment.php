@@ -120,4 +120,12 @@ class Segment
     {
         $this->avgColor = $avgColor;
     }
+
+    /**
+     * @return string
+     */
+    public function __toString()
+    {
+        return "POS: {$this->startX}, {$this->startY}, {$this->endX}, {$this->endY} RGBA ({$this->avgColor})";
+    }
 }
