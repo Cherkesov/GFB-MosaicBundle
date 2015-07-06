@@ -55,14 +55,14 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
                 InputOption::VALUE_REQUIRED,
                 "Which images do you want to find?",
                 null
-            )
-            ->addOption(
+            )/*->addOption(
                 'color',
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Which images do you want to find?",
                 null
-            );
+            )*/
+        ;
     }
 
     /**
@@ -80,17 +80,18 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
         $this->output = $output;
 
         $query = $input->getOption("query");
-        $color = $input->getOption("color");
+//        $color = $input->getOption("color");
 
-        if (!in_array($color, self::$GOOGLE_COLORS)) {
+        /*if (!in_array($color, self::$GOOGLE_COLORS)) {
             $output->writeln("Error: Color not found! Must be [" . implode(", ", self::$GOOGLE_COLORS). "]");
             return -1;
+        }*/
+        foreach (self::$GOOGLE_COLORS as $color) {
+            $results = $this->collectingResults($query, $color);
+
+            $output->writeln("Compile [{$color}] " . count($results) . " images...");
+            $this->processResults($results, $color);
         }
-
-        $results = $this->collectingResults($query, $color);
-
-        $output->writeln("Compile " . count($results) . " images...");
-        $this->processResults($results, $color);
 
         return 0;
     }
@@ -108,7 +109,6 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
             $results1 = $data["responseData"]["results"];
 
             if (!is_array($results1)) {
-                print_r($data);
                 break;
             }
 
@@ -157,8 +157,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
                 ->setPath($this->basePath . $filename)
                 ->setWidth($imagick->getWidth())
                 ->setHeight($imagick->getHeight())
-                ->setColor($color)
-            ;
+                ->setColor($color);
 
             if ($part->getId() > 0) {
                 $em->merge($part);

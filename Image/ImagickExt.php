@@ -104,7 +104,7 @@ class ImagickExt extends \Imagick
      * @param int $sy
      * @param int $ex
      * @param int $ey
-     * @return \Imagick
+     * @return ImagickExt
      */
     public function getImageFromRect($sx, $sy, $ex, $ey)
     {
