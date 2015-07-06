@@ -13,10 +13,26 @@ use GFB\MosaicBundle\Image\ImagickExt;
 use GFB\MosaicBundle\Repo\PartRepo;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class FillPartsBaseCommand extends ContainerAwareCommand
+class FillBaseFromGoogleCommand extends ContainerAwareCommand
 {
+    private static $GOOGLE_COLORS = array(
+        "black",
+        "blue",
+        "brown",
+        "gray",
+        "green",
+        "orange",
+        "pink",
+        "purple",
+        "red",
+        "teal",
+        "white",
+        "yellow",
+    );
+
     /** @var OutputInterface */
     private $output;
 
@@ -31,15 +47,22 @@ class FillPartsBaseCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('gfb:mosaic:fill-base')
-            ->setDescription('Fill base of parts command')/*->addOption(
+            ->setName('gfb:mosaic:fill:google')
+            ->setDescription('Fill base of parts command')
+            ->addOption(
                 'query',
                 null,
                 InputOption::VALUE_REQUIRED,
                 "Which images do you want to find?",
                 null
-            )*/
-        ;;
+            )
+            ->addOption(
+                'color',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which images do you want to find?",
+                null
+            );
     }
 
     /**
@@ -49,11 +72,39 @@ class FillPartsBaseCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        if (!extension_loaded('imagick')) {
+            $output->writeln("Error: Imagick not found! You should install it!");
+            return -1;
+        }
+
         $this->output = $output;
 
+        $query = $input->getOption("query");
+        $color = $input->getOption("color");
+
+        if (!in_array($color, self::$GOOGLE_COLORS)) {
+            $output->writeln("Error: Color not found! Must be [" . implode(", ", self::$GOOGLE_COLORS). "]");
+            return -1;
+        }
+
+        $results = $this->collectingResults($query, $color);
+
+        $output->writeln("Compile " . count($results) . " images...");
+        $this->processResults($results, $color);
+
+        return 0;
+    }
+
+    /**
+     * @param string $query
+     * @param string $color
+     * @return array
+     */
+    private function collectingResults($query, $color)
+    {
         $results = array();
         while (count($results) < 100) {
-            $data = $this->getData("face", count($results));
+            $data = $this->getData($query, count($results), $color);
             $results1 = $data["responseData"]["results"];
 
             if (!is_array($results1)) {
@@ -63,19 +114,18 @@ class FillPartsBaseCommand extends ContainerAwareCommand
 
             $results = array_merge($results, $results1);
         }
-
-        $output->writeln("Compile " . count($results) . " images...");
-        $this->processResults($results);
+        return $results;
     }
 
     /**
      * @param array $results
+     * @param string $color
      */
-    private function processResults($results)
+    private function processResults($results, $color)
     {
         $em = $this->getEm();
         /** @var PartRepo $partRepo */
-        $partRepo = $em->getRepository("ADWMosaicBundle:Part");
+        $partRepo = $em->getRepository("GFBMosaicBundle:Part");
 
         foreach ($results as $imgData) {
             $code = md5($imgData["imageId"] . $imgData["url"]);
@@ -88,19 +138,6 @@ class FillPartsBaseCommand extends ContainerAwareCommand
             } catch (\Exception $ex) {
                 $this->output->writeln(" [FAIL] ");
                 continue;
-
-                /*$fileContent = file_get_contents($imgData["url"]);
-                if (is_string($fileContent) && strpos($fileContent, "base64") > 0) {
-                    $fileContent = str_replace("data:image/jpeg;base64,", "", $fileContent);
-                    $fileContent = base64_decode($fileContent);
-                    if (!$fileContent) {
-                        continue;
-                    }
-                    $imagick->readImageBlob($fileContent);
-                    print_r($fileContent);
-                } else {
-                    continue;
-                }*/
             }
             $this->output->writeln(" [OK] ");
 
@@ -119,7 +156,9 @@ class FillPartsBaseCommand extends ContainerAwareCommand
                 ->setCode($code)
                 ->setPath($this->basePath . $filename)
                 ->setWidth($imagick->getWidth())
-                ->setHeight($imagick->getHeight());
+                ->setHeight($imagick->getHeight())
+                ->setColor($color)
+            ;
 
             if ($part->getId() > 0) {
                 $em->merge($part);
@@ -131,21 +170,14 @@ class FillPartsBaseCommand extends ContainerAwareCommand
     }
 
     /**
-     * @return \Doctrine\Common\Persistence\ObjectManager|\Doctrine\ORM\EntityManager|object
-     */
-    private function getEm()
-    {
-        return $this->getContainer()->get("doctrine")->getEntityManager();
-    }
-
-    /**
      * @param string $query
      * @param int $offset
+     * @param string $color
      * @return array
      */
-    public function getData($query, $offset)
+    public function getData($query, $offset, $color = "")
     {
-        $filename = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={$query}&start={$offset}";
+        $filename = "http://ajax.googleapis.com/ajax/services/search/images?v=1.0&q={$query}&start={$offset}&imgcolor={$color}";
         $s = file_get_contents($filename);
 
         if ($s == null) {
@@ -156,5 +188,13 @@ class FillPartsBaseCommand extends ContainerAwareCommand
         }
 
         return json_decode($s, true);
+    }
+
+    /**
+     * @return \Doctrine\Common\Persistence\ObjectManager|\Doctrine\ORM\EntityManager|object
+     */
+    private function getEm()
+    {
+        return $this->getContainer()->get("doctrine")->getEntityManager();
     }
 }
