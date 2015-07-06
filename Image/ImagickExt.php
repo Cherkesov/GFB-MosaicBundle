@@ -16,6 +16,7 @@ class ImagickExt extends \Imagick
     private $black;
 
     /**
+     * Default constructor
      * @param mixed|null $files
      */
     public function __construct($files = null)
@@ -27,6 +28,7 @@ class ImagickExt extends \Imagick
 
     /**
      * Draw line between points
+     * Нарисовать линии между указанными точками
      * @param int $sx
      * @param int $sy
      * @param int $ex
@@ -43,6 +45,7 @@ class ImagickExt extends \Imagick
 
     /**
      * Draw rect (4 lines)
+     * Нарисовать прямоугольник (4 линии)
      * @param int $sx
      * @param int $sy
      * @param int $ex
@@ -52,12 +55,13 @@ class ImagickExt extends \Imagick
     {
         $this->drawLine($sx, $sy, $ex, $sy); // top
         $this->drawLine($ex, $sy, $ex, $ey); // right
-//        $this->drawRect($imagick, $sx, $sy, $sx, $ey); // left
-//        $this->drawRect($imagick, $sx, $ey, $ex, $ey); //bottom
+        $this->drawLine($sx, $sy, $sx, $ey); // left
+        $this->drawLine($sx, $ey, $ex, $ey); //bottom
     }
 
     /**
      * Make width and height of image are multiple of defined size
+     * Сделать ширину и высоту изображения кратными некоторому числу
      * @param int $size
      */
     public function cutSizeMultipleOf($size)
@@ -72,12 +76,14 @@ class ImagickExt extends \Imagick
 
         $this->cropImage(
             $nWidth, $nHeight,
-            intval($width / 2), intval($height / 2)
+            intval($width / 2) - $nWidth / 2, intval($height / 2 - $nHeight / 2)
         );
+        $this->setImagePage(0, 0, 0, 0);
     }
 
     /**
      * Make square image - cut image by min dimension (width or height)
+     * Сделать изображение квадратным - обрезать используя значение меньшего измерения (ширина и высота)
      */
     public function cutToSquare()
     {
@@ -91,15 +97,12 @@ class ImagickExt extends \Imagick
             $size, $size,
             intval($width / 2) - $size / 2, intval($height / 2) - $size / 2
         );
-
-//        return clone $this;
-//        $this->setImagePage(0, 0, 0, 0);
-//        $this->coalesceImages();
-//        $this->resizeImage($size, $size, \Imagick::FILTER_LANCZOS, $size);
+        $this->setImagePage(0, 0, 0, 0);
     }
 
     /**
      * Get clone of image's part
+     * Получить часть изображения
      * @param int $sx
      * @param int $sy
      * @param int $ex
@@ -112,12 +115,19 @@ class ImagickExt extends \Imagick
         $height = $ey - $sy;
 
         $copy = clone $this;
-        $copy->cropImage($width, $height, $sx + $width / 2, $sy + $height / 2);
+        try {
+            $copy->cropImage($width, $height, $sx, $sy);
+            $copy->setImagePage(0, 0, 0, 0);
+        } catch (\Exception $ex) {
+            // TODO: Разобраться почему возникает ошибка
+        }
 
         return $copy;
     }
 
     /**
+     * Get image average color
+     * Получить средн. значение цвета изображения
      * @return Color|null
      */
     public function getAvgColor()
@@ -139,6 +149,22 @@ class ImagickExt extends \Imagick
         $rgb = $pixel->getcolor();
 
         return new Color($rgb['r'], $rgb['g'], $rgb['b'], $rgb['a']);
+    }
+
+    /**
+     * Get average color of some image part
+     * Получить сред. значение цвета для некоторой области изображения
+     * @param $sx
+     * @param $sy
+     * @param $ex
+     * @param $ey
+     * @return Color|null
+     */
+    public function getAvgColorOfRect($sx, $sy, $ex, $ey)
+    {
+        $image = $this->getImageFromRect($sx, $sy, $ex, $ey);
+
+        return $image->getAvgColor();
     }
 
     /**
