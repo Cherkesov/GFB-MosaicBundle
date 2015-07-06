@@ -13,6 +13,7 @@ use GFB\MosaicBundle\Image\ImagickExt;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CreateMosaicCommand extends ContainerAwareCommand
@@ -36,19 +37,44 @@ class CreateMosaicCommand extends ContainerAwareCommand
     protected function configure()
     {
         $this
-            ->setName('adw:mosaic:create')
+            ->setName('gfb:mosaic:create')
             ->setDescription('Create mosaic command')
-            ->addArgument(
+            ->addOption(
                 'file',
-                InputArgument::REQUIRED,
-                'Which file do you want to process?'
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which file do you want to process?",
+                null
             )
-            ->addArgument(
-                'partSize',
-                InputArgument::REQUIRED,
-                'Which file do you want to process?'
+            ->addOption(
+                'size',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which file do you want to process?",
+                null
             )
-        ;
+            ->addOption(
+                'level',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which file do you want to process?",
+                null
+            )
+            ->addOption(
+                'accuracy',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which file do you want to process?",
+                null
+            )
+            ->addOption(
+                'opacity',
+                null,
+                InputOption::VALUE_REQUIRED,
+                "Which file do you want to process?",
+                null
+            )
+            ;
     }
 
     /**
@@ -66,6 +92,9 @@ class CreateMosaicCommand extends ContainerAwareCommand
             return -1;
         }
 
+        if (!file_exists($this->mosaicsPath)) {
+            mkdir($this->mosaicsPath, 0777);
+        }
         if (!is_writable($this->mosaicsPath)) {
             chmod($this->mosaicsPath, 0777);
         }
@@ -79,27 +108,27 @@ class CreateMosaicCommand extends ContainerAwareCommand
             exit;
         }
 
-        $name = $input->getArgument('file');
-        $partSize = $input->getArgument('partSize');
+        $name = $input->getOption('file');
+        $partSize = $input->getOption('size');
+        $segmentationLevel = $input->getOption("level");
+        $accuracy = $input->getOption('accuracy');
+        $partOpacity = $input->getOption("opacity");;
 
         $imagick->readImage($this->imagesPath . $name);
 
         // TODO: Do some magic!
 
         try {
-            $imagick->cutSizeMultipleOf($partSize);
-
-            $processor = new ImageProcessor($imagick, $partSize, 4, true);
+            $processor = new ImageProcessor($imagick);
             $processor->setPartRepo(
                 $this->getContainer()->get("doctrine")->getEntityManager()
                     ->getRepository("GFBMosaicBundle:Part")
             );
 
-            $processor->runSegmentation();
-            $processor->paveSegments();
+            $processor->segmentation($partSize, $segmentationLevel);
+            $processor->paving($accuracy, $partOpacity);
         } catch (\Exception $ex) {
-//            echo $ex->getMessage() . "\n";
-//            echo $ex->getFile() . " # " .  $ex->getLine() . "\n";
+            echo $ex->getMessage() . "\n";
         }
 
         // TODO: Finish some magic!
