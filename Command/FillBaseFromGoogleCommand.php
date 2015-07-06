@@ -80,12 +80,6 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
         $this->output = $output;
 
         $query = $input->getOption("query");
-//        $color = $input->getOption("color");
-
-        /*if (!in_array($color, self::$GOOGLE_COLORS)) {
-            $output->writeln("Error: Color not found! Must be [" . implode(", ", self::$GOOGLE_COLORS). "]");
-            return -1;
-        }*/
         foreach (self::$GOOGLE_COLORS as $color) {
             $results = $this->collectingResults($query, $color);
 
@@ -143,7 +137,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
 
             $imagick->cutToSquare();
             $imagick->setFormat("png");
-            $filename = $imgData["imageId"] . ".png";
+            $filename = $code . ".png";
             $imagick->writeImage($this->docRoot . $this->basePath . $filename);
 
             $part = $partRepo->findOneByCode($code);
