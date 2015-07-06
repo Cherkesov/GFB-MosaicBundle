@@ -89,11 +89,7 @@ class ImageProcessor
         $height = $ey - $sy;
 
         $part = $this->imagick->getImageFromRect($sx, $sy, $ex, $ey);
-        if (
-            $level <= $this->levels && $this->needDividePart($part)
-//            && $width >= 16 && $height >= 16
-        ) {
-//            echo str_repeat(" ", $level) . "-> {$sx}, {$sy}, {$ex}, {$ey} ({$width}x{$height})\n";
+        if ($level <= $this->levels && $this->needDividePart($part)) {
             $this->makeSegment($sx, $sy, $ex - $width / 2, $ey - $height / 2, $level); // top left
             $this->makeSegment($sx + $width / 2, $sy, $ex, $ey - $height / 2, $level); // top right
             $this->makeSegment($sx, $sy + $height / 2, $ex - $width / 2, $ey, $level); // bottom left
@@ -105,8 +101,6 @@ class ImageProcessor
             }
         }
     }
-
-//    private $counter = 0; // TODO: Remove it
 
     /**
      * @param ImagickExt $imagick
@@ -123,27 +117,10 @@ class ImageProcessor
         $topRightPart = $imagick->getImageFromRect($width / 2, 0, $width, $height / 2);
         $bottomLeftPart = $imagick->getImageFromRect(0, $height / 2, $width / 2, $height);
 
-//        echo implode(", ", array(0, 0, $width / 2, $height / 2)) . "\n";
-//        echo implode(", ", array($width / 2, $height / 2, $width, $height)) . "\n\n";
-
-        /*if ($this->debug) {
-            $imgPath = __DIR__ . "/../../../../web/mosaic/res/compars/";
-
-            if (!file_exists($imgPath)) {
-                mkdir($imgPath);
-                chmod($imgPath, 0777);
-            }
-
-            $topLeftPart->writeImage($imgPath . "{$this->counter}-tl-{$topLeftPart->getWidth()}x{$topLeftPart->getHeight()}.png");
-            $bottomRightPart->writeImage($imgPath . "{$this->counter}-br-{$bottomRightPart->getWidth()}x{$bottomRightPart->getHeight()}.png");
-            $this->counter++;
-        }*/
-
         $sub1 = Color::compare($topLeftPart->getAvgColor(), $bottomRightPart->getAvgColor());
         $sub2 = Color::compare($topRightPart->getAvgColor(), $bottomLeftPart->getAvgColor());
 
         return (($sub1 + $sub2) / 2 > 8);
-//        return false;
     }
 
     /**
@@ -173,38 +150,38 @@ class ImageProcessor
     }
 
     /**
+     * @param int $accuracy
      * @return bool
      */
-    public function paveSegments()
+    public function paveSegments($accuracy = 32)
     {
         if (count($this->segmentationMap) == 0) {
+            echo "Segmentation map is empty!\n";
             return false;
         }
 
         if (!$this->partRepo) {
+            echo "PartRepo is not defined!\n";
             return false;
         }
 
+        echo "Paving for " . count($this->segmentationMap) . " segments...\n";
+
         /** @var Segment $segment */
         foreach ($this->segmentationMap as $segment) {
-            $part = $this->partRepo->findOneWithColorLike($segment->getAvgColor(), 32);
+            $part = $this->partRepo->findOneWithColorLike($segment->getAvgColor(), $accuracy);
 
             if (!$part) {
                 continue;
             }
+            echo "Found image for {$segment}\n";
 
             $tile = new ImagickExt($this->docRoot . $part->getPath());
-
-            /*$imagick = $this->imagick->getImageFromRect(
-                $segment->getStartX(), $segment->getStartY(),
-                $segment->getEndX(), $segment->getEndY()
-            );*/
             $tile->resizeImage(
                 $segment->getEndX() - $segment->getStartX(),
                 $segment->getEndY() - $segment->getStartY(),
                 \Imagick::FILTER_LANCZOS, 1
             );
-
             $this->imagick->compositeImage(
                 $tile, \Imagick::COMPOSITE_OVER,
                 $segment->getStartX(), $segment->getStartY()
