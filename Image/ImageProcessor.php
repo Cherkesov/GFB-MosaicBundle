@@ -8,7 +8,6 @@
 
 namespace GFB\MosaicBundle\Image;
 
-
 use GFB\MosaicBundle\Entity\Color;
 use GFB\MosaicBundle\Entity\Segment;
 use GFB\MosaicBundle\Repo\PartRepo;
@@ -39,11 +38,9 @@ class ImageProcessor
      * @param int $levels
      * @param bool $debug
      */
-    public function __construct($imagick, $partSize, $levels, $debug = false)
+    public function __construct($imagick, $debug = false)
     {
         $this->imagick = $imagick;
-        $this->partSize = $partSize;
-        $this->levels = $levels;
         $this->debug = $debug;
 
         $this->docRoot = __DIR__ . "/../../../../web";
@@ -51,10 +48,17 @@ class ImageProcessor
     }
 
     /**
-     *
+     * Entry point for segmentation process
+     * Используется для запуска сегментации
+     * @param $partSize
+     * @param $levels
      */
-    public function runSegmentation()
+    public function segmentation($partSize, $levels)
     {
+        $this->imagick->cutSizeMultipleOf($partSize);
+        $this->partSize = $partSize;
+        $this->levels = $levels;
+
         $width = $this->imagick->getWidth();
         $height = $this->imagick->getHeight();
 
@@ -75,13 +79,15 @@ class ImageProcessor
     }
 
     /**
+     * Make segmentation if need else store segment to map
+     * Выполняет сегментацию если нужно иначе записывает информацию о текущем сегменте в карту
      * @param int $sx
      * @param int $sy
      * @param int $ex
      * @param int $ey
      * @param int $level
      */
-    public function makeSegment($sx, $sy, $ex, $ey, $level)
+    private function makeSegment($sx, $sy, $ex, $ey, $level)
     {
         $level++;
 
@@ -103,10 +109,12 @@ class ImageProcessor
     }
 
     /**
+     * Check segmentation need of image part
+     * Проверяет необходимость деления части изображения
      * @param ImagickExt $imagick
      * @return bool
      */
-    public function needDividePart($imagick)
+    private function needDividePart($imagick)
     {
         $width = $imagick->getWidth();
         $height = $imagick->getHeight();
@@ -124,6 +132,8 @@ class ImageProcessor
     }
 
     /**
+     * Drawing marks for segments
+     * Рисование меток для сегментов
      * @param int $sx
      * @param int $sy
      * @param int $ex
@@ -150,10 +160,13 @@ class ImageProcessor
     }
 
     /**
+     * Paving entry point
+     * Используется для запуска механизма замащивания
      * @param int $accuracy
+     * @param float|int $partOpacity
      * @return bool
      */
-    public function paveSegments($accuracy = 32)
+    public function paving($accuracy = 32, $partOpacity = 1)
     {
         if (count($this->segmentationMap) == 0) {
             echo "Segmentation map is empty!\n";
@@ -182,6 +195,7 @@ class ImageProcessor
                 $segment->getEndY() - $segment->getStartY(),
                 \Imagick::FILTER_LANCZOS, 1
             );
+            $tile->setImageOpacity($partOpacity);
             $this->imagick->compositeImage(
                 $tile, \Imagick::COMPOSITE_OVER,
                 $segment->getStartX(), $segment->getStartY()
