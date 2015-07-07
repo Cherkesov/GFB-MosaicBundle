@@ -103,6 +103,10 @@ class MarkupGenerator
      */
     private function itemCode($canvasWidth, $canvasHeight, $segment)
     {
+        if ($segment->getPart() == null) {
+            return "";
+        }
+
         $width = floatval($segment->getWidth() / ($canvasWidth / 100));
         $height = floatval($segment->getHeight() / ($canvasHeight / 100));
 
