@@ -39,7 +39,7 @@ Bundle for Symfony2
 2. Install Imagich for PHP if you have not it:
 
     ```
-    sudo apt-get -y install php5-imagick
+    $ sudo apt-get -y install php5-imagick
     ```
 
 ## Usage
