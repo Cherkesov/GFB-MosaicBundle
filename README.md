@@ -7,6 +7,33 @@ Bundle for Symfony2
 1. Fill base of images which will be used in a paving
 2. Create mosaic for selected image with collected base
 
+## Installation
+
+1. Install vendor - add to composer.json repository and requirement for mosaic bundle:
+
+    "require": {
+        ...
+        **"gfb/mosaic-bundle": "dev-master"**
+        ...
+    }
+    
+    ```
+    "repositories": [
+        ...
+        {
+          "type": "vcs",
+          "url": "https://github.com/Cherkesov/GFB-MosaicBundle.git"
+        }
+        ...
+    ]
+    ```
+    
+    Run: 
+    
+    ```
+    $ php composer update
+    ```
+
 ## Usage
 
 1. Run command

@@ -1,0 +1,34 @@
+{
+  "name": "gfb/mosaic-bundle",
+  "description": "Create mosaic bundle",
+  "type": "symfony-bundle",
+  "authors": [
+    {
+      "name": "Cherkesov Sergey",
+      "email": "go.for.broke1006@gmail.com"
+    }
+  ],
+  "keywords": [
+    "gfb mosaic bundle"
+  ],
+  "license": [
+    "MIT"
+  ],
+  "require": {
+  },
+  "autoload": {
+    "psr-0": {
+      "GFB\\MosaicBundle": ""
+    }
+  },
+  "target-dir": "GFB/MosaicBundle",
+  "repositories": [
+    {
+    }
+  ],
+  "extra": {
+    "branch-alias": {
+      "dev-master": "1.0-dev"
+    }
+  }
+}
