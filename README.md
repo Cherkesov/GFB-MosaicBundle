@@ -47,7 +47,7 @@ Bundle for Symfony2
 1. Run command
 
     ```
-    php app/console gfb:mosaic:fill:google --query="girls+hairstyles"
+    $ php app/console gfb:mosaic:fill:google --query="girls+hairstyles"
     ```
     
     and wait for base is filled with images. Run command again with other keywords (param "query") if you want to expand your images base.
@@ -55,7 +55,7 @@ Bundle for Symfony2
 2. Run command 
 
     ```
-    php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
+    $ php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
     ```
     
     Options:
