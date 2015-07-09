@@ -30,4 +30,4 @@ Bundle for Symfony2
       - **accuracy** specify accuracy of color comparison. Zero - average part and segment colors must be equals
       - **opacity** affects the parts. Value between 0 (invisible) and 1 (good opacity)
 
-3. Open http//your-site.com/mosaic/res/R4.jpg.html - this is result file which contains mosaic
+3. Open __http//your-site.com/mosaic/res/R4.jpg.html__ - this is result file which contains mosaic
