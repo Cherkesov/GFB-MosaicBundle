@@ -20,12 +20,14 @@ Bundle for Symfony2
 2. Run command 
 
     ```
-    php app/console gfb:mosaic:create 1.jpg 128 72
+    php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
     ```
     
-    where:
-      - 1.jpg is name of image file in "YOUR_PROJECT_DIR\web\mosaic\images" directory
-      - 128 is size of the biggest path for segmentation
-      - 72 is number which define accuracy for selecting images for segment (color agreement accuracy)
+    Options:
+      - **file** which will be processed, must located in **web/mosaic/images/4.jpg**
+      - **size** of biggest segment size of mosaic
+      - **level** specify count of segments divisions. If size=32 and level=4 it means that mosaic will contains segments with sizes 32x32, 16x16, 8x8 and 4x4
+      - **accuracy** specify accuracy of color comparison. Zero - average part and segment colors must be equals
+      - **opacity** affects the parts. Value between 0 (invisible) and 1 (good opacity)
 
-3. Check dir "YOUR_PROJECT_DIR\web\mosaic\res" and find file R1.jpg - this is result file which contains mosaic
+3. Open http//your-site.com/mosaic/res/R4.jpg.html - this is result file which contains mosaic
