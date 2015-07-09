@@ -11,11 +11,13 @@ Bundle for Symfony2
 
 1. Install vendor - add to composer.json repository and requirement for mosaic bundle:
 
+    ```
     "require": {
         ...
-        **"gfb/mosaic-bundle": "dev-master"**
+        "gfb/mosaic-bundle": "dev-master"
         ...
     }
+    ```
     
     ```
     "repositories": [
@@ -33,6 +35,10 @@ Bundle for Symfony2
     ```
     $ php composer update
     ```
+    
+2. Install Imagich for PHP if you have not it:
+
+    sudo apt-get -y install php5-imagick
 
 ## Usage
 
