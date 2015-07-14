@@ -151,7 +151,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
             $part
                 ->setAvgColor($imagick->getAvgColor())
                 ->setCode($code)
-                ->setPath($this->basePath . $filename)
+                ->setPath($filename)
                 ->setWidth($imagick->getWidth())
                 ->setHeight($imagick->getHeight())
                 ->setColor($color);

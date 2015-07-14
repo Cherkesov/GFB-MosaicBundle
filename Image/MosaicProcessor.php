@@ -189,7 +189,7 @@ class MosaicProcessor
             echo "Found image for {$segment}\n";
             $segment->setPart($part);
 
-            $tile = new ImagickExt($this->webDir . $part->getPath());
+            $tile = new ImagickExt($this->webDir . $this->basePath . $part->getPath());
             $tile->resizeImage(
                 $segment->getEndX() - $segment->getStartX(),
                 $segment->getEndY() - $segment->getStartY(),

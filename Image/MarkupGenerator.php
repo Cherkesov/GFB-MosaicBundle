@@ -10,15 +10,37 @@ namespace GFB\MosaicBundle\Image;
 
 use GFB\MosaicBundle\Entity\Segment;
 
+/**
+ * Class MarkupGenerator
+ * @package GFB\MosaicBundle\Image
+ */
 class MarkupGenerator
 {
+    /** @var string */
+    private $webDir;
+
+    /** @var string */
+    private $basePath;
+
     /**
+     * Default constructor
+     * @param string $webDir
+     * @param string $basePath
+     */
+    public function __construct($webDir, $basePath)
+    {
+        $this->webDir = $webDir;
+        $this->basePath = $basePath;
+    }
+
+    /**
+     * Run markup file generation
+     * Запустить генерацию файла с версткой
      * @param ImagickExt $imagick
-     * @param string $docRoot
      * @param string $filePath
      * @param Segment[] $segments
      */
-    public function generate($imagick, $docRoot, $filePath, $segments)
+    public function generate($imagick, $filePath, $segments)
     {
         $markup = "
 <style>
@@ -92,10 +114,12 @@ class MarkupGenerator
 </script>
 ';
 
-        file_put_contents($docRoot. $filePath . ".html", $markup);
+        file_put_contents($this->webDir . $filePath . ".html", $markup);
     }
 
     /**
+     * Generate markup for segment's layout
+     * Сгенерировать верстку слоя сегмента
      * @param $canvasWidth
      * @param $canvasHeight
      * @param Segment $segment
@@ -116,10 +140,11 @@ class MarkupGenerator
         echo "Part size : {$width}x{$height} {$left} {$top}\n";
 
         $path = ($segment->getPart()) ? $segment->getPart()->getPath() : "";
+        $path = "/" . $this->basePath . $path;
 
         return "
     <div class=\"mosaic_part\" style=\"position: absolute;
         width: {$width}%; height: {$height}%;
-        top: {$top}%; left: {$left}%;\" data-orig=\"/{$path}\"></div>";
+        top: {$top}%; left: {$left}%;\" data-orig=\"{$path}\"></div>";
     }
 }

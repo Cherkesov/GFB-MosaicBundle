@@ -26,6 +26,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
     private $webDir;
     private $imagesPath;
     private $mosaicsPath;
+    private $basePath;
 
     /** @var OutputInterface */
     private $output;
@@ -36,6 +37,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
 
         $this->imagesPath = "mosaic/images/";
         $this->mosaicsPath = "mosaic/res/";
+        $this->basePath = "mosaic/base/";
     }
 
     protected function configure()
@@ -138,10 +140,9 @@ class CreateMosaicCommand extends ContainerAwareCommand
             $processor->paving($accuracy, $partOpacity);
             $imagick->writeImage($mosaicFullPath . "R" . $name);
 
-            $markupGen = new MarkupGenerator();
+            $markupGen = new MarkupGenerator($this->webDir, $this->basePath);
             $markupGen->generate(
                 $imagick,
-                $this->webDir,
                 $this->mosaicsPath . "R" . $name,
                 $processor->getSegments()
             );
