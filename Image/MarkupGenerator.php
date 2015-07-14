@@ -25,7 +25,7 @@ class MarkupGenerator
     .mosaic_canvas {
         width: 1280px;
         margin: 0 auto;
-        background-image: url({$filePath});
+        background-image: url(/{$filePath});
         background-size: 100% auto;
         position: relative;
     }
@@ -56,7 +56,7 @@ class MarkupGenerator
         ";
 
         $markup .= "<div class=\"mosaic_canvas\">";
-        $markup .= "    <img src='{$filePath}' style='visibility:hidden;'/>";
+        $markup .= "    <img src='/{$filePath}' style='visibility:hidden;'/>";
 
         $cW = $imagick->getWidth();
         $cH = $imagick->getHeight();
@@ -120,6 +120,6 @@ class MarkupGenerator
         return "
     <div class=\"mosaic_part\" style=\"position: absolute;
         width: {$width}%; height: {$height}%;
-        top: {$top}%; left: {$left}%;\" data-orig=\"{$path}\"></div>";
+        top: {$top}%; left: {$left}%;\" data-orig=\"/{$path}\"></div>";
     }
 }

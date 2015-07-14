@@ -23,7 +23,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class CreateMosaicCommand extends ContainerAwareCommand
 {
-    private $docRoot;
+    private $webDir;
     private $imagesPath;
     private $mosaicsPath;
 
@@ -34,9 +34,8 @@ class CreateMosaicCommand extends ContainerAwareCommand
     {
         parent::__construct();
 
-        $this->docRoot = __DIR__ . "/../../../../web";
-        $this->imagesPath = $this->docRoot . "/mosaic/images/";
-        $this->mosaicsPath = "/mosaic/res/";
+        $this->imagesPath = "mosaic/images/";
+        $this->mosaicsPath = "mosaic/res/";
     }
 
     protected function configure()
@@ -91,6 +90,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
     {
         // php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
 
+        $this->webDir = $this->getContainer()->get("kernel")->getRootDir() . "/../web/";
         $this->output = $output;
 
         if (!extension_loaded('imagick')) {
@@ -99,7 +99,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
             return -1;
         }
 
-        $mosaicFullPath = $this->docRoot . $this->mosaicsPath;
+        $mosaicFullPath = $this->webDir . $this->mosaicsPath;
 
         if (!file_exists($mosaicFullPath)) {
             mkdir($mosaicFullPath, 0777);
@@ -123,12 +123,12 @@ class CreateMosaicCommand extends ContainerAwareCommand
         $accuracy = $input->getOption('accuracy');
         $partOpacity = $input->getOption("opacity");
 
-        $imagick->readImage($this->imagesPath . $name);
+        $imagick->readImage($this->webDir . $this->imagesPath . $name);
 
-        // TODO: Do some magic!
+        // Do some magic!
 
         try {
-            $processor = new MosaicProcessor($imagick);
+            $processor = new MosaicProcessor($imagick, $this->webDir);
             $processor->setPartRepo(
                 $this->getContainer()->get("doctrine")->getEntityManager()
                     ->getRepository("GFBMosaicBundle:Part")
@@ -141,7 +141,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
             $markupGen = new MarkupGenerator();
             $markupGen->generate(
                 $imagick,
-                $this->docRoot,
+                $this->webDir,
                 $this->mosaicsPath . "R" . $name,
                 $processor->getSegments()
             );
@@ -149,7 +149,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
             echo $ex->getMessage() . "\n";
         }
 
-        // TODO: Finish some magic!
+        // Finish some magic!
 
         return 0;
     }

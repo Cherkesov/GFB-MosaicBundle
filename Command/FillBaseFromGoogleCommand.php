@@ -18,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class FillBaseFromGoogleCommand extends ContainerAwareCommand
 {
+    /** @var array */
     private static $GOOGLE_COLORS = array(
         "black",
         "blue",
@@ -33,17 +34,24 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
         "yellow",
     );
 
+    /** @var string */
+    private $webDir;
+
     /** @var OutputInterface */
     private $output;
 
+    /**
+     * Default constructor
+     */
     public function __construct()
     {
         parent::__construct();
-
-        $this->docRoot = __DIR__ . "/../../../../web";
-        $this->basePath = "/mosaic/base/";
+        $this->basePath = "mosaic/base/";
     }
 
+    /**
+     * Configure arguments and options sets for command
+     */
     protected function configure()
     {
         $this
@@ -71,6 +79,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
             return -1;
         }
 
+        $this->webDir = $this->getContainer()->get("kernel")->getRootDir() . "/../web/";
         $this->output = $output;
 
         $query = $input->getOption("query");
@@ -132,7 +141,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
             $imagick->cutToSquare();
             $imagick->setFormat("png");
             $filename = $code . ".png";
-            $imagick->writeImage($this->docRoot . $this->basePath . $filename);
+            $imagick->writeImage($this->webDir . $this->basePath . $filename);
 
             $part = $partRepo->findOneByCode($code);
             if (!$part) {

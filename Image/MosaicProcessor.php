@@ -34,15 +34,16 @@ class MosaicProcessor
 
     /**
      * @param ImagickExt $imagick
+     * @param string $webDir
      * @param bool $debug
      */
-    public function __construct($imagick, $debug = false)
+    public function __construct($imagick, $webDir, $debug = false)
     {
         $this->imagick = $imagick;
         $this->debug = $debug;
 
-        $this->docRoot = __DIR__ . "/../../../../web";
-        $this->basePath = "/mosaic/base/";
+        $this->webDir = $webDir;
+        $this->basePath = "mosaic/base/";
     }
 
     /**
@@ -188,7 +189,7 @@ class MosaicProcessor
             echo "Found image for {$segment}\n";
             $segment->setPart($part);
 
-            $tile = new ImagickExt($this->docRoot . $part->getPath());
+            $tile = new ImagickExt($this->webDir . $part->getPath());
             $tile->resizeImage(
                 $segment->getEndX() - $segment->getStartX(),
                 $segment->getEndY() - $segment->getStartY(),
