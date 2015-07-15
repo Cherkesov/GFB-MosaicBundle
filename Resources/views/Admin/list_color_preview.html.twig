@@ -1,0 +1,8 @@
+{% extends 'SonataAdminBundle:CRUD:base_list_field.html.twig' %}
+
+{% block field %}
+    {% if value.red is defined and value.green is defined and value.blue is defined and value.alpha is defined %}
+        <div style="background-color: rgba({{ value.red }}, {{ value.green }}, {{ value.blue }}, {{ value.alpha }});
+                width: 64px; height: 64px;"></div>
+    {% endif %}
+{% endblock %}

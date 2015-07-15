@@ -9,6 +9,7 @@
 namespace GFB\MosaicBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use GFB\CoreBundle\Entity\AbstractEntity;
 
 /**
  * Class Part
@@ -16,19 +17,11 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="GFB\MosaicBundle\Repo\PartRepo")
  * @ORM\Table(name="gfb_mosaic_part")
  */
-class Part
+class Part extends AbstractEntity
 {
     /**
-     * @var int
-     * @ORM\Column(type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
-
-    /**
      * @var Color
-     * @ORM\OneToOne(targetEntity="Color",cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Color", cascade={"persist", "remove"})
      */
     private $avgColor;
 
@@ -61,14 +54,6 @@ class Part
      * @ORM\Column(type="string", length=256, nullable=true)
      */
     private $color;
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
 
     /**
      * @return Color
@@ -177,32 +162,4 @@ class Part
         $this->color = $color;
         return $this;
     }
-
-    /*public function getAbsolutePath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadRootDir().'/'.$this->path;
-    }
-
-    public function getWebPath()
-    {
-        return null === $this->path
-            ? null
-            : $this->getUploadDir().'/'.$this->path;
-    }
-
-    protected function getUploadRootDir()
-    {
-        // the absolute directory path where uploaded
-        // documents should be saved
-        return __DIR__.'/../../../../web/'.$this->getUploadDir();
-    }
-
-    protected function getUploadDir()
-    {
-        // get rid of the __DIR__ so it doesn't screw up
-        // when displaying uploaded doc/image in the view.
-        return 'uploads/documents';
-    }*/
 }

@@ -1,0 +1,13 @@
+parameters:
+#    gfb.articles.example.class: GFB\Articles\Example
+
+services:
+    gfb.mosaic.admin.part:
+        class: GFB\MosaicBundle\Admin\PartAdmin
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: "GFB Mosaic", label: "Parts" }
+        arguments:
+            - ~
+            - GFB\MosaicBundle\Entity\Part
+            - GFBCoreBundle:CRUD
+        calls: ~

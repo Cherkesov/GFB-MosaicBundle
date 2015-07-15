@@ -15,6 +15,7 @@
     "MIT"
   ],
   "require": {
+    "gfb/core-bundle": "dev-master"
   },
   "autoload": {
     "psr-0": {
@@ -24,6 +25,8 @@
   "target-dir": "GFB/MosaicBundle",
   "repositories": [
     {
+      "type": "vcs",
+      "url": "https://github.com/Cherkesov/GFB-CoreBundle.git"
     }
   ],
   "extra": {
