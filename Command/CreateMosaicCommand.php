@@ -24,8 +24,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class CreateMosaicCommand extends ContainerAwareCommand
 {
     private $webDir;
-    private $imagesPath;
-    private $mosaicsPath;
+    private $originsPath;
+    private $resultsPath;
     private $basePath;
 
     /** @var OutputInterface */
@@ -34,10 +34,6 @@ class CreateMosaicCommand extends ContainerAwareCommand
     public function __construct()
     {
         parent::__construct();
-
-        $this->imagesPath = "mosaic/images/";
-        $this->mosaicsPath = "mosaic/res/";
-        $this->basePath = "mosaic/base/";
     }
 
     protected function configure()
@@ -93,6 +89,9 @@ class CreateMosaicCommand extends ContainerAwareCommand
         // php app/console gfb:mosaic:create --file="4.jpg" --size=32 --level=2 --accuracy=16 --opacity=0.6
 
         $this->webDir = $this->getContainer()->get("kernel")->getRootDir() . "/../web/";
+        $this->originsPath = $this->getContainer()->getParameter("gfb_mosaic.origins_dir");
+        $this->resultsPath = $this->getContainer()->getParameter("gfb_mosaic.results_dir");
+        $this->basePath = $this->getContainer()->getParameter("gfb_mosaic.base_dir");
         $this->output = $output;
 
         if (!extension_loaded('imagick')) {
@@ -101,7 +100,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
             return -1;
         }
 
-        $mosaicFullPath = $this->webDir . $this->mosaicsPath;
+        $mosaicFullPath = $this->webDir . $this->resultsPath;
 
         if (!file_exists($mosaicFullPath)) {
             mkdir($mosaicFullPath, 0777);
@@ -125,7 +124,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
         $accuracy = $input->getOption('accuracy');
         $partOpacity = $input->getOption("opacity");
 
-        $imagick->readImage($this->webDir . $this->imagesPath . $name);
+        $imagick->readImage($this->webDir . $this->originsPath . $name);
 
         // Do some magic!
 
@@ -143,7 +142,7 @@ class CreateMosaicCommand extends ContainerAwareCommand
             $markupGen = new MarkupGenerator($this->webDir, $this->basePath);
             $markupGen->generate(
                 $imagick,
-                $this->mosaicsPath . "R" . $name,
+                $this->resultsPath . "R" . $name,
                 $processor->getSegments()
             );
         } catch (\Exception $ex) {

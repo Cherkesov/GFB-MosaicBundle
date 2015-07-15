@@ -37,6 +37,9 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
     /** @var string */
     private $webDir;
 
+    /** @var string */
+    private $basePath;
+
     /** @var OutputInterface */
     private $output;
 
@@ -46,7 +49,6 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
     public function __construct()
     {
         parent::__construct();
-        $this->basePath = "mosaic/base/";
     }
 
     /**
@@ -63,8 +65,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
                 InputOption::VALUE_REQUIRED,
                 "Which images do you want to find?",
                 null
-            )
-        ;
+            );
     }
 
     /**
@@ -80,6 +81,7 @@ class FillBaseFromGoogleCommand extends ContainerAwareCommand
         }
 
         $this->webDir = $this->getContainer()->get("kernel")->getRootDir() . "/../web/";
+        $this->basePath = $this->getContainer()->getParameter("gfb_mosaic.base_dir");
         $this->output = $output;
 
         $query = $input->getOption("query");
