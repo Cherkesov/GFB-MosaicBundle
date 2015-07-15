@@ -32,14 +32,14 @@ class PartRepo extends EntityRepository
      */
     public function findOneWithColorLike($color, $accuracy)
     {
-        $colorRepo = $this->_em->getRepository("GFBMosaicBundle:Color");
-
         // Пробуем найти полное соответствие цвета
-        $colors = $colorRepo->findBy(array(
-            "red" => $color->getRed(),
-            "green" => $color->getGreen(),
-            "blue" => $color->getBlue(),
-        ));
+        $partQb = $this->createQueryBuilder("part");
+        $partQb->join("part.avgColor", "color");
+        $partQb->where($partQb->expr()->eq("color.red", $color->getRed()));
+        $partQb->where($partQb->expr()->eq("color.green", $color->getGreen()));
+        $partQb->where($partQb->expr()->eq("color.blue", $color->getBlue()));
+        $partQb->where($partQb->expr()->eq("part.active", true));
+        $parts = $partQb->getQuery()->execute();
 
         $criteria = new Criteria();
         $expressionRed = $criteria->expr()->andX(
@@ -56,25 +56,19 @@ class PartRepo extends EntityRepository
         );
 
         // Если не получилось то ищем похожие цвета с некоторой погрешностью
-        if (count($colors) == 0) {
-            $criteria->andWhere($expressionRed);
-            $criteria->andWhere($expressionGreen);
-            $criteria->andWhere($expressionBlue);
-            $colors = $colorRepo->matching($criteria);
+        if (count($parts) == 0) {
+            $partQb = $this->createQueryBuilder("part");
+            $partQb->join("part.avgColor", "color");
+            $partQb->andWhere($expressionRed);
+            $partQb->andWhere($expressionGreen);
+            $partQb->andWhere($expressionBlue);
+            $partQb->where($partQb->expr()->eq("part.active", true));
+            $parts = $partQb->getQuery()->execute();
         }
 
-        // Если не получилось то ищем похожие цвета с огромной погрешностью!!!
-        /*if (count($colors) == 0) {
-            $criteria->orWhere($expressionRed);
-            $criteria->orWhere($expressionGreen);
-            $criteria->orWhere($expressionBlue);
-            $colors = $colorRepo->matching($criteria);
-        }*/
-
-        if (count($colors) > 0) {
-            // TODO: Нужно выбирать один из элементов рандомно
-            $index = rand(0, count($colors) - 1);
-            return $this->findOneBy(array("avgColor" => $colors[$index]));
+        if (count($parts) > 0) {
+            $index = rand(0, count($parts) - 1);
+            return $parts[$index];
         }
 
         return null;
