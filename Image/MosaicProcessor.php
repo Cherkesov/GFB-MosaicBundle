@@ -177,19 +177,21 @@ class MosaicProcessor
             return false;
         }
 
-        echo "Paving for " . count($this->segments) . " segments...\n";
+        $segmentsCount = count($this->segments);
+        echo "Paving for " . $segmentsCount . " segments...\n";
 
-        /** @var Segment $segment */
+        $counter = 1;
         foreach ($this->segments as $segment) {
+            /** @var Segment $segment */
             $part = $this->partRepo->findOneWithColorLike($segment->getAvgColor(), $accuracy);
 
             if (!$part) {
                 continue;
             }
-            echo "Found image for {$segment}\n";
+            echo "Found image for {$segment} ({$counter} / {$segmentsCount})\n";
             $segment->setPart($part);
 
-            $tile = new ImagickExt($this->webDir . $this->basePath . $part->getPath());
+            $tile = new ImagickExt($this->webDir . $part->getPath());
             $tile->resizeImage(
                 $segment->getEndX() - $segment->getStartX(),
                 $segment->getEndY() - $segment->getStartY(),
@@ -200,6 +202,8 @@ class MosaicProcessor
                 $tile, \Imagick::COMPOSITE_OVER,
                 $segment->getStartX(), $segment->getStartY()
             );
+
+            $counter++;
         }
 
         return true;
