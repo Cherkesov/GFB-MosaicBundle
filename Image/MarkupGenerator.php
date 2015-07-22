@@ -45,7 +45,7 @@ class MarkupGenerator
         $markup = "
 <style>
     .mosaic_canvas {
-        width: 1280px;
+        width: 960px;
         margin: 0 auto;
         background-image: url(/{$filePath});
         background-size: 100% auto;
@@ -140,7 +140,6 @@ class MarkupGenerator
         echo "Part size : {$width}x{$height} {$left} {$top}\n";
 
         $path = ($segment->getPart()) ? $segment->getPart()->getPath() : "";
-        $path = "/" . $this->basePath . $path;
 
         return "
     <div class=\"mosaic_part\" style=\"position: absolute;
