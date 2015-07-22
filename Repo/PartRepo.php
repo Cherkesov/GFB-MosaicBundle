@@ -35,34 +35,52 @@ class PartRepo extends EntityRepository
         // Пробуем найти полное соответствие цвета
         $partQb = $this->createQueryBuilder("part");
         $partQb->join("part.avgColor", "color");
-        $partQb->where($partQb->expr()->eq("color.red", $color->getRed()));
-        $partQb->where($partQb->expr()->eq("color.green", $color->getGreen()));
-        $partQb->where($partQb->expr()->eq("color.blue", $color->getBlue()));
-        $partQb->where($partQb->expr()->eq("part.active", true));
+
+        $partQb->andWhere($partQb->expr()->eq("color.red", $color->getRed()));
+        $partQb->andWhere($partQb->expr()->eq("color.green", $color->getGreen()));
+        $partQb->andWhere($partQb->expr()->eq("color.blue", $color->getBlue()));
+
+        $partQb->andWhere($partQb->expr()->eq("part.active", true));
         $parts = $partQb->getQuery()->execute();
 
-        $criteria = new Criteria();
+        /*$criteria = new Criteria();
         $expressionRed = $criteria->expr()->andX(
-            $criteria->expr()->gt("red", $color->getRed() - $accuracy),
-            $criteria->expr()->lt("red", $color->getRed() + $accuracy)
+            $criteria->expr()->gt("color.red", $color->getRed() - $accuracy),
+            $criteria->expr()->lt("color.red", $color->getRed() + $accuracy)
         );
         $expressionGreen = $criteria->expr()->andX(
-            $criteria->expr()->gt("green", $color->getGreen() - $accuracy),
-            $criteria->expr()->lt("green", $color->getGreen() + $accuracy)
+            $criteria->expr()->gt("color.green", $color->getGreen() - $accuracy),
+            $criteria->expr()->lt("color.green", $color->getGreen() + $accuracy)
         );
         $expressionBlue = $criteria->expr()->andX(
-            $criteria->expr()->gt("blue", $color->getBlue() - $accuracy),
-            $criteria->expr()->lt("blue", $color->getBlue() + $accuracy)
-        );
+            $criteria->expr()->gt("color.blue", $color->getBlue() - $accuracy),
+            $criteria->expr()->lt("color.blue", $color->getBlue() + $accuracy)
+        );*/
 
         // Если не получилось то ищем похожие цвета с некоторой погрешностью
         if (count($parts) == 0) {
             $partQb = $this->createQueryBuilder("part");
             $partQb->join("part.avgColor", "color");
-            $partQb->andWhere($expressionRed);
-            $partQb->andWhere($expressionGreen);
-            $partQb->andWhere($expressionBlue);
-            $partQb->where($partQb->expr()->eq("part.active", true));
+
+//            $partQb->andWhere($expressionRed);
+//            $partQb->andWhere($expressionGreen);
+//            $partQb->andWhere($expressionBlue);
+
+//            $partQb->andWhere("color.red > ". ($color->getRed() - $accuracy));
+//            $partQb->andWhere("color.red < ". ($color->getRed() + $accuracy));
+//            $partQb->andWhere("color.green > ". ($color->getGreen() - $accuracy));
+//            $partQb->andWhere("color.green < ". ($color->getGreen() + $accuracy));
+//            $partQb->andWhere("color.blue > ". ($color->getBlue() - $accuracy));
+//            $partQb->andWhere("color.blue < ". ($color->getBlue() + $accuracy));
+
+            $partQb->andWhere($partQb->expr()->gt("color.red", $color->getRed() - $accuracy / 2));
+            $partQb->andWhere($partQb->expr()->lt("color.red", $color->getRed() + $accuracy / 2));
+            $partQb->andWhere($partQb->expr()->gt("color.green", $color->getGreen() - $accuracy / 2));
+            $partQb->andWhere($partQb->expr()->lt("color.green", $color->getGreen() + $accuracy / 2));
+            $partQb->andWhere($partQb->expr()->gt("color.blue", $color->getBlue() - $accuracy / 2));
+            $partQb->andWhere($partQb->expr()->lt("color.blue", $color->getBlue() + $accuracy / 2));
+
+            $partQb->andWhere($partQb->expr()->eq("part.active", true));
             $parts = $partQb->getQuery()->execute();
         }
 
